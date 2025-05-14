@@ -12,7 +12,7 @@ public class Grappler : MonoBehaviour
     public float boostForce = 5f;            // 우클릭 가속
     public LayerMask grappleLayer;           // Raycast가 감지할 대상의 레이어 (square)
 
-    public float maxGrappleDistance = 100f;  // Raycast가 최대 탐색 거리
+    public float maxGrappleDistance = 8f;  // Raycast가 최대 탐색 거리
     public float allowedMissOffset = 1.5f;   // (임시) 마우스 클릭 위치와 실제 연결 지점 사이 허용 거리
 
     void Start()
@@ -35,15 +35,15 @@ public class Grappler : MonoBehaviour
                 transform.position,
                 direction.normalized,
                 maxGrappleDistance,
-                grappleLayer);
+                grappleLayer.value);
 
             // 충돌한 오브젝트가 있고 자기 자신이 아니라면
             if (hit.collider != null && hit.collider.gameObject != gameObject)
             {
                 float hitDistance = Vector2.Distance(transform.position, hit.point);
 
-                // 너무 가까운 지점은 연결X
-                if (hitDistance > 2f)
+                // 너무 가깝거나 먼 지점은 연결X
+                if (hitDistance > 2f && hitDistance <= maxGrappleDistance)
                 {
                     // 조인트 연결 설정
                     _distanceJoint.connectedAnchor = hit.point;   // 충돌 지점을 조인트 연결점으로 설정
@@ -73,8 +73,21 @@ public class Grappler : MonoBehaviour
             // 우클릭 시: 현재 속도 방향으로 가속
             if (Input.GetKeyDown(KeyCode.Mouse1))
             {
-                Vector2 velocityDir = rb.velocity.normalized;
-                rb.AddForce(velocityDir * boostForce, ForceMode2D.Impulse);
+                // 현재 속도 크기 계산
+                float currentSpeed = rb.velocity.magnitude;
+
+                // 기준 이하일 경우: 고정된 방향으로 당김
+                if (currentSpeed < 0.1f)
+                {
+                    Vector2 pullDirection = (_distanceJoint.connectedAnchor - (Vector2)transform.position).normalized;
+                    rb.AddForce(pullDirection * boostForce, ForceMode2D.Impulse);
+                }
+                else
+                {
+                    // 기존처럼 속도 방향으로 부스트
+                    Vector2 velocityDir = rb.velocity.normalized;
+                    rb.AddForce(velocityDir * boostForce, ForceMode2D.Impulse);
+                }
             }
         }
     }
