@@ -16,6 +16,11 @@ public class Grappler : MonoBehaviour
     [Header("가속 수치")]
     [SerializeField]
     private float boostForce = 5f;            // 우클릭 가속
+
+    [Header("정지 시 당김 수치")]
+    [SerializeField]
+    private float pullForce = 8f;            // <정지했을시> 우클릭 당김
+
     [Header("감지할 대상")]
     [SerializeField]
     private LayerMask grappleLayer;           // Raycast가 감지할 대상의 레이어 (square)
@@ -23,7 +28,7 @@ public class Grappler : MonoBehaviour
     [Header("Grapple 최대 거리")]
     [SerializeField]
     private float maxGrappleDistance = 8f;  // Raycast가 최대 탐색 거리
-    
+
     [Header("Grapple 최소 거리")]
     [SerializeField]
     private float minGrappleDistance = 2f;  // Raycast가 최소 탐색 거리
@@ -45,7 +50,7 @@ public class Grappler : MonoBehaviour
         {
             distanceJoint.enabled = false;      // 시작 시 연결 비활성화
         }
-        
+
         if (rb == null)
         {
             Debug.LogError("Rigidbody2D 컴포넌트가 설정되지 않았습니다.");
@@ -54,10 +59,11 @@ public class Grappler : MonoBehaviour
 
     private void Update()
     {
-        InputGrapple();                   // 그래플링 입력 처리
+        InputGrapple();                   /// 그래플링 입력 처리
         ReleaseGrapple();                 // 그래플링 해제 처리
         UpdateGrappleLine();              // 줄 업데이트
-        InputBoost();                     // 우클릭 가속 처리
+        InputBoost();                     // 우클릭 가속 or 당기기기
+        CheckTargetOut();                 // 연결된 오프젝트 화면 이탈 체크
     }
 
     private void InputGrapple()
@@ -78,24 +84,41 @@ public class Grappler : MonoBehaviour
                 grappleLayer);
 
             // 충돌한 오브젝트가 있고 자기 자신이 아니라면
-            if (hit.collider != null)
+            if (hit.collider != null && hit.collider.gameObject != gameObject)
             {
                 float hitDistance = Vector2.Distance(transform.position, hit.point);
+                Debug.Log("Raycast 충돌: " + hit.collider.name);
+                Debug.Log("Rigidbody2D: " + hit.collider.attachedRigidbody);
 
-                // 너무 가깝거나 먼 지점은 연결X
                 if (hitDistance > minGrappleDistance && hitDistance <= maxGrappleDistance)
                 {
-                    // 조인트 연결 설정
-                    distanceJoint.connectedAnchor = hit.point;   // 충돌 지점을 조인트 연결점으로 설정
-                    distanceJoint.distance = hitDistance;        // 초기 거리 설정
-                    distanceJoint.enabled = true;                // 연결 활성화
+                    // Rigidbody2D 가져오기
+                    Rigidbody2D targetRb = hit.collider.attachedRigidbody;
 
-                    // 줄 시각화
-                    lineRenderer.SetPosition(0, transform.position); // 플레이어 위치
-                    lineRenderer.SetPosition(1, hit.point);          // 충돌 지점
-                    lineRenderer.enabled = true;                     // 줄 표시
+                    if (targetRb != null)
+                    {
+                        // 움직이는 물체인 경우
+                        distanceJoint.connectedBody = targetRb;
+                        distanceJoint.autoConfigureDistance = false;
+                        distanceJoint.distance = hitDistance;
+                    }
+                    else
+                    {
+                        // 움직이지 않는 물체인 경우
+                        distanceJoint.connectedAnchor = hit.point;
+                        distanceJoint.connectedBody = null;
+                        distanceJoint.distance = hitDistance;
+                    }
+
+                    // 조인트 활성화
+                    distanceJoint.enabled = true;
+                    // 줄의 시작점은 항상 플레이어 위치로 갱신
+                    lineRenderer.SetPosition(0, transform.position);
+                    lineRenderer.SetPosition(1, hit.point);
+                    lineRenderer.enabled = true;
                 }
             }
+
         }
     }
 
@@ -111,40 +134,63 @@ public class Grappler : MonoBehaviour
 
     private void UpdateGrappleLine()
     {
-        if (distanceJoint.enabled)
-        {
-            // 줄의 시작점은 항상 플레이어 위치로 갱신
-            lineRenderer.SetPosition(0, transform.position);
+        if (!distanceJoint.enabled) return;     // 줄 비활성화 시: 업데이트 중지
+
+        // 시작점 플레이어 위치로 갱신
+        lineRenderer.SetPosition(0, transform.position);
+
+        if (distanceJoint.connectedBody != null)    // 움직이는 물체
+        {   // 줄의 끝점은 연결된 물체 위치로 갱신
+            lineRenderer.SetPosition(1, distanceJoint.connectedBody.position);
+        }
+        else    // 고정된 물체
+        {       // 줄의 끝점은 연결된 앵커 위치
+            lineRenderer.SetPosition(1, distanceJoint.connectedAnchor);
         }
     }
 
     private void InputBoost()
     {
-        // 그래플링 중일 때 (줄 연결 상태)
-        if (distanceJoint.enabled)
+        if (!distanceJoint.enabled) return;     // 줄 비활성화 시: 업데이트 중지
+
+        // 줄의 시작점은 항상 플레이어 위치로 갱신
+        lineRenderer.SetPosition(0, transform.position);
+
+        // 우클릭 시: 현재 속도 방향으로 가속
+        if (Input.GetKeyDown(KeyCode.Mouse1))
         {
-            // 줄의 시작점은 항상 플레이어 위치로 갱신
-            lineRenderer.SetPosition(0, transform.position);
+            // 현재 속도 크기 계산
+            float currentSpeed = rb.velocity.magnitude;
 
-            // 우클릭 시: 현재 속도 방향으로 가속
-            if (Input.GetKeyDown(KeyCode.Mouse1))
+            // 기준 이하일 경우: 고정된 방향으로 당김
+            if (currentSpeed < 0.1f)
             {
-                // 현재 속도 크기 계산
-                float currentSpeed = rb.velocity.magnitude;
+                Vector2 pullDirection = (distanceJoint.connectedAnchor - (Vector2)transform.position).normalized;
+                rb.AddForce(pullDirection * pullForce, ForceMode2D.Impulse);
+            }
+            else
+            {
+                // 기존처럼 속도 방향으로 부스트
+                Vector2 velocityDir = rb.velocity.normalized;
+                rb.AddForce(velocityDir * boostForce, ForceMode2D.Impulse);
+            }
+        }
 
-                // 기준 이하일 경우: 고정된 방향으로 당김
-                if (currentSpeed < 0.1f)
-                {
-                    Vector2 pullDirection = (distanceJoint.connectedAnchor - (Vector2)transform.position).normalized;
-                    rb.AddForce(pullDirection * boostForce, ForceMode2D.Impulse);
-                }
-                else
-                {
-                    // 기존처럼 속도 방향으로 부스트
-                    Vector2 velocityDir = rb.velocity.normalized;
-                    rb.AddForce(velocityDir * boostForce, ForceMode2D.Impulse);
-                }
+    }
+    private void CheckTargetOut()
+    {
+        if (!lineRenderer.enabled) return;
+
+        if (distanceJoint.enabled && distanceJoint.connectedBody != null)
+        {
+            Renderer targetRenderer = distanceJoint.connectedBody.GetComponent<Renderer>();
+            if (targetRenderer != null && !targetRenderer.isVisible)
+            {
+                Debug.Log("오브젝트 화면 이탈, 줄 해제");
+                distanceJoint.enabled = false;
+                lineRenderer.enabled = false;
             }
         }
     }
+
 }
