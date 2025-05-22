@@ -5,15 +5,21 @@ public class Obstacle : MonoBehaviour
     [Header("장애물 이동 속도")]
     [SerializeField]
     private float moveSpeed = 5f;
+    
+    [Range(0, 10)]
+    [SerializeField]
+    private int attackDamage = 1;
+    
+    private const float DestroyX = -15f; // 장애물 제거 위치
 
     void Update()
     {
         transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
-
+        
         // 일정 거리 지나면 자동 제거
-        if (transform.position.x < -15f)
+        if (transform.position.x < DestroyX)
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 
@@ -21,13 +27,16 @@ public class Obstacle : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
+            if (other.TryGetComponent(out PlayerHealth playerHealth))
             {
-                playerHealth.TakeDamage(1);
+                playerHealth.TakeDamage(attackDamage);
             }
-
-            Destroy(gameObject);
+            else
+            {
+                Debug.LogWarning("PlayerHealth 컴포넌트가 없습니다.");
+            }
+            
+            gameObject.SetActive(false);
         }
     }
 }

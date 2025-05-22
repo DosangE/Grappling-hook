@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ObstacleSpawner : MonoBehaviour
@@ -20,22 +21,50 @@ public class ObstacleSpawner : MonoBehaviour
     [Header("최대 높이")]
     [SerializeField]
     private float maxY = 3f;
+    
+    List<GameObject> obstacles = new List<GameObject>();
+    
+    [Header("Pool 개수")]
+    [SerializeField]
+    private int maxObstacleCount = 10;
 
 
-    void Start()
+    private void Start()
     {
+        for (int i = 0; i < maxObstacleCount; i++)
+        {
+            GameObject obj = Instantiate(obstaclePrefab, Vector3.zero, Quaternion.identity);
+            obj.SetActive(false); // 비활성화
+            obstacles.Add(obj); // 리스트에 추가
+        }
+        
         StartCoroutine(SpawnObstacleRoutine());
     }
 
-    IEnumerator SpawnObstacleRoutine()
+    private IEnumerator SpawnObstacleRoutine()
     {
         while (true)
         {
             Vector3 spawnPos = spawnPoint.position;
             spawnPos.y = Random.Range(minY, maxY);
-            Instantiate(obstaclePrefab, spawnPos, Quaternion.identity);     // 장애물 생성
+            GameObject obj = GetObstacle(spawnPos);
             yield return new WaitForSeconds(spawnInterval); // 생성 주기 대기
             Debug.Log("장애물 생성됨");
         }
+    }
+
+    private GameObject GetObstacle(Vector3 position)
+    {
+        foreach (var obstacle in obstacles)
+        {
+            if (!obstacle.activeSelf)
+            {
+                obstacle.transform.position = position; // 위치 설정
+                obstacle.SetActive(true); // 활성화
+                return obstacle; // 장애물 반환
+            }
+        }
+
+        return null;
     }
 }

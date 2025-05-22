@@ -10,5 +10,11 @@ public class PlayerHealth : MonoBehaviour
     {
         health -= damage;
         Debug.Log("현재 체력: " + health);
+
+        if (health <= 0)
+        {
+            // TODO: 플레이어 사망 처리
+            GameManager.instance.GameOver();
+        }
     }
 }
