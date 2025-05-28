@@ -6,23 +6,26 @@ using UnityEngine.Serialization;
 
 public class Grappler : MonoBehaviour
 {
-    [Header("컴포넌트 설정")] [SerializeField] private LineRenderer lineRenderer; // 와이어(줄)를 시각적으로 그려주는 컴포넌트
+    [Header("컴포넌트 설정")][SerializeField] private LineRenderer lineRenderer; // 와이어(줄)를 시각적으로 그려주는 컴포넌트
     [SerializeField] private DistanceJoint2D distanceJoint; // 실제 물리적으로 플레이어와 대상 사이를 연결해주는 조인트
     [SerializeField] private Rigidbody2D rb; // 플레이어의 Rigidbody2D (circle)
 
-    [Header("가속 수치")] [SerializeField] private float boostForce = 5f; // 우클릭 가속
+    [Header("가속 수치")][SerializeField] private float boostForce = 5f; // 우클릭 가속
 
-    [Header("정지 시 당김 수치")] [SerializeField]
+    [Header("정지 시 당김 수치")]
+    [SerializeField]
     private float pullForce = 8f; // <정지했을시> 우클릭 당김
 
-    [Header("감지할 대상")] [SerializeField] private LayerMask grappleLayer; // Raycast가 감지할 대상의 레이어 (square)
+    [Header("감지할 대상")][SerializeField] private LayerMask grappleLayer; // Raycast가 감지할 대상의 레이어 (square)
 
-    [Header("Grapple 최대 거리")] [SerializeField]
+    [Header("Grapple 최대 거리")]
+    [SerializeField]
     private float maxGrappleDistance = 8f; // Raycast가 최대 탐색 거리
 
-    [Header("Grapple 최소 거리")] [SerializeField]
+    [Header("Grapple 최소 거리")]
+    [SerializeField]
     private float minGrappleDistance = 2f; // Raycast가 최소 탐색 거리
-    
+
     private void Awake()
     {
         if (lineRenderer == null)
@@ -49,6 +52,8 @@ public class Grappler : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.instance.CurrentGameState != GameManager.GameState.Playing)
+            return;
         InputGrapple(); /// 그래플링 입력 처리
         ReleaseGrapple(); // 그래플링 해제 처리
         UpdateGrappleLine(); // 줄 업데이트
