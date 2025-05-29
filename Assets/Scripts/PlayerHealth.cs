@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
@@ -5,6 +6,13 @@ public class PlayerHealth : MonoBehaviour
     [Header("플레이어 체력")]
     [SerializeField]
     public int health = 5;
+    
+    public Action<int> OnHealthChanged;
+
+    private void Start()
+    {
+        OnHealthChanged?.Invoke(health);
+    }
 
     public void TakeDamage(int damage)
     {
@@ -22,5 +30,7 @@ public class PlayerHealth : MonoBehaviour
         {
             GameManager.instance.GameOver();
         }
+        
+        OnHealthChanged?.Invoke(health);
     }
 }

@@ -5970,6 +5970,7 @@ GameObject:
   - component: {fileID: 2094162383}
   - component: {fileID: 2094162382}
   - component: {fileID: 2094162381}
+  - component: {fileID: 2094162384}
   m_Layer: 5
   m_Name: HealthText
   m_TagString: Untagged
@@ -6093,6 +6094,19 @@ RectTransform:
   m_AnchoredPosition: {x: 600, y: 350}
   m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2094162384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094162380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c223198073e4f7f846a625c11cb8d1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerHealth: {fileID: 291991025}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

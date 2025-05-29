@@ -83,7 +83,6 @@ public class GameManager : MonoBehaviour
     {
         Score = 0;
         scoreText.text = "Score: 0";
-        healthText.text = "HP: " + FindObjectOfType<PlayerHealth>().health;
 
         CurrentGameState = GameState.Playing;
         lobbyUI.SetActive(false);
