@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Obstacle : MonoBehaviour
@@ -38,5 +39,15 @@ public class Obstacle : MonoBehaviour
             
             gameObject.SetActive(false);
         }
+    }
+
+    public void OnGettingFromPool()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnReturningToPool()
+    {
+        throw new System.NotImplementedException();
     }
 }
