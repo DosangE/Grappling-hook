@@ -7,14 +7,13 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public enum GameState { Lobby, Playing, Paused, GameOver }
-    public GameState CurrentGameState { get; private set; } = GameState.Lobby;
+    public enum GameState { Playing, Paused, GameOver }
+    public GameState CurrentGameState { get; private set; } = GameState.Playing;
 
     public int Score { get; private set; } = 0;
     [SerializeField] private int scorePerSecond = 1;
 
     [Header("UI Panels")]
-    public GameObject lobbyUI;
     public GameObject gameUI;
     public GameObject pausePopupUI;
     public GameObject gameOverUI;
@@ -38,7 +37,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        ShowLobbyUI();
+        StartGame(); // 게임 초기화    
     }
 
     private void Update()
@@ -69,15 +68,6 @@ public class GameManager : MonoBehaviour
     }
 
     // UI & 상태 변경 메서드
-    public void ShowLobbyUI()
-    {
-        CurrentGameState = GameState.Lobby;
-        lobbyUI.SetActive(true);
-        gameUI.SetActive(false);
-        pausePopupUI.SetActive(false);
-        gameOverUI.SetActive(false);
-        Time.timeScale = 0;
-    }
 
     public void StartGame()
     {
@@ -85,7 +75,6 @@ public class GameManager : MonoBehaviour
         scoreText.text = "Score: 0";
 
         CurrentGameState = GameState.Playing;
-        lobbyUI.SetActive(false);
         gameUI.SetActive(true);
         pausePopupUI.SetActive(false);
         gameOverUI.SetActive(false);
@@ -117,7 +106,7 @@ public class GameManager : MonoBehaviour
 
     public void ReturnToLobby()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // 씬을 아예 다시 로드
+        SceneManager.LoadScene("LobbyScene");
     }
 
     public void QuitGame()
