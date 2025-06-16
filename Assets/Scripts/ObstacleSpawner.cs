@@ -27,6 +27,8 @@ public class ObstacleSpawner : MonoBehaviour
     [Header("Pool 개수")]
     [SerializeField]
     private int maxObstacleCount = 10;
+    
+    private WaitForSeconds _waitForSpawn;
 
 
     private void Start()
@@ -38,6 +40,7 @@ public class ObstacleSpawner : MonoBehaviour
             obstacles.Add(obj); // 리스트에 추가
         }
         
+        _waitForSpawn = new WaitForSeconds(spawnInterval);
         StartCoroutine(SpawnObstacleRoutine());
     }
 
@@ -48,8 +51,7 @@ public class ObstacleSpawner : MonoBehaviour
             Vector3 spawnPos = spawnPoint.position;
             spawnPos.y = Random.Range(minY, maxY);
             GameObject obj = GetObstacle(spawnPos);
-            yield return new WaitForSeconds(spawnInterval); // 생성 주기 대기
-            Debug.Log("장애물 생성됨");
+            yield return _waitForSpawn;
         }
     }
 
