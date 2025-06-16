@@ -19,8 +19,6 @@ public class PlayerHealth : MonoBehaviour
         health -= damage;
         health = Mathf.Max(0, health);
 
-        Debug.Log("현재 체력: " + health);
-
         if (GameManager.instance != null && GameManager.instance.healthText != null)
         {
             GameManager.instance.healthText.text = "HP: " + health;
