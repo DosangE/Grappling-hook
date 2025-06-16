@@ -52,7 +52,6 @@ public class ObstacleSpawner : MonoBehaviour
             spawnPos.y = Random.Range(minY, maxY);
             GameObject obj = GetObstacle(spawnPos);
             yield return _waitForSpawn;
-            Debug.Log("장애물 생성됨");
         }
     }
 
