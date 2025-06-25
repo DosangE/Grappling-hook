@@ -31,6 +31,7 @@ public class PlayerHealth : MonoBehaviour
         {
             GameManager.instance.healthText.text = "HP: " + health;
         }
+        SoundManager.instance?.PlayHitSound();
         animator.SetTrigger("Hit");
         StartCoroutine(InvincibleRoutine());
         if (health <= 0)
