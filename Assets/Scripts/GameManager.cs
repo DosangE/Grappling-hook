@@ -34,7 +34,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
     private void Start()
     {
         StartGame(); // 게임 초기화    
@@ -73,12 +72,12 @@ public class GameManager : MonoBehaviour
     {
         Score = 0;
         scoreText.text = "Score: 0";
-
         CurrentGameState = GameState.Playing;
         gameUI.SetActive(true);
         pausePopupUI.SetActive(false);
         gameOverUI.SetActive(false);
         Time.timeScale = 1;
+        SoundManager.instance.PlayBGM(SoundManager.instance.mainBGM);
         StartCoroutine(IE_AddScore());
     }
 
@@ -106,11 +105,13 @@ public class GameManager : MonoBehaviour
 
     public void ReturnToLobby()
     {
+        SoundManager.instance.PlayClickSound();
         SceneManager.LoadScene("LobbyScene");
     }
 
     public void QuitGame()
     {
+        SoundManager.instance.PlayClickSound();
         Application.Quit();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
