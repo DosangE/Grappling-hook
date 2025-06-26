@@ -77,7 +77,9 @@ public class GameManager : MonoBehaviour
         pausePopupUI.SetActive(false);
         gameOverUI.SetActive(false);
         Time.timeScale = 1;
-        SoundManager.instance.PlayBGM(SoundManager.instance.mainBGM);
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayBGM(SoundManager.instance.mainBGM);
+
         StartCoroutine(IE_AddScore());
     }
 
@@ -105,7 +107,8 @@ public class GameManager : MonoBehaviour
 
     public void ReturnToLobby()
     {
-        SoundManager.instance.PlayClickSound();
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayClickSound();
         SceneManager.LoadScene("LobbyScene");
     }
 
