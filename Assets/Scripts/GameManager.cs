@@ -43,10 +43,14 @@ public class GameManager : MonoBehaviour
     {
         if (CurrentGameState == GameState.Playing && Input.GetKeyDown(KeyCode.Escape))
         {
+            if (SoundManager.instance != null)
+                SoundManager.instance.PlayClickSound();
             PauseGame();
         }
         else if (CurrentGameState == GameState.Paused && Input.GetKeyDown(KeyCode.Escape))
         {
+            if (SoundManager.instance != null)
+                SoundManager.instance.PlayClickSound();
             ResumeGame();
         }
     }
@@ -114,7 +118,8 @@ public class GameManager : MonoBehaviour
 
     public void QuitGame()
     {
-        SoundManager.instance.PlayClickSound();
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayClickSound();
         Application.Quit();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
